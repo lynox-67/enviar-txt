@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LYNOX HUB - EXTRAER TXT (links completos) 🐱‍🚀</title>
+  <title>LYNOX HUB - DESCARGAR Y ENVIAR ARCHIVOS REALES AL WEBHOOK 🐱‍🚀</title>
   <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Press+Start+2P&family=Vt323&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -108,20 +108,20 @@
 </head>
 <body>
 <div class="container">
-  <h1>LYNOX HUB - EXTRAER TXT (links completos) 🐱‍💻</h1>
+  <h1>LYNOX HUB - DESCARGAR Y ENVIAR ARCHIVOS REALES 🐱‍💻</h1>
   <div class="by">HECHO POR LYNX LOCO CON GARRAS AZULES</div>
   <div class="discord">Únete al caos → <a href="https://discord.gg/spWx8vKT" target="_blank">discord.gg/spWx8vKT</a> 🐾</div>
   <p style="font-size:1rem; text-align:center; margin:15px 0;">
-    Sube tu txt con links de Discord → ahora captura enlaces completos (incluyendo &hm=...)<br>
-    <small>Intenta extraer contenido → reintenta sin parámetros si falla</small>
+    Sube txt con links de Discord → descarga el contenido real del archivo → lo envía como adjunto al webhook 🔥<br>
+    <small>(solo links .txt de cdn.discordapp.com)</small>
   </p>
   <input type="file" id="fileInput" accept=".txt" multiple>
-  <label for="webhook">Webhook Discord (opcional):</label>
-  <textarea id="webhook" placeholder="https://discord.com/api/webhooks/..."></textarea>
+  <label for="webhook">Webhook Discord (obligatorio para enviar):</label>
+  <textarea id="webhook" placeholder="https://discord.com/api/webhooks/12345/abcdef..."></textarea>
   <div style="text-align:center; margin:20px 0;">
-    <button id="startSend">INICIAR EXTRACCIÓN 🐱‍🚀</button>
+    <button id="startSend">LANZAR DESCARGA Y ENVÍO 🐱‍🚀</button>
   </div>
-  <div id="status">Listo... sube tu archivo con los 1965 links 🔥</div>
+  <div id="status">Listo para descargar y enviar archivos reales... sube tu txt 🔥</div>
   <div id="preview"></div>
 </div>
 <div class="footer">
@@ -130,7 +130,7 @@
 
 <script>
 let linksFiltrados = [];
-let contenidosExtraidos = [];
+let archivosExtraidos = []; // {nombre: string, contenido: string}
 
 const statusEl = document.getElementById('status');
 const previewEl = document.getElementById('preview');
@@ -152,9 +152,14 @@ function esLinkTxtDiscord(url) {
   }
 }
 
-async function procesarArchivos() {
+async function procesarYEnviar() {
   const input = document.getElementById('fileInput');
-  if (!input.files?.length) return mostrarEstado('Selecciona tu txt con links primero', 'error');
+  if (!input.files?.length) return mostrarEstado('Sube tu txt con links primero', 'error');
+
+  const webhook = webhookEl.value.trim();
+  if (!webhook || !webhook.startsWith('https://discord.com/api/webhooks/')) {
+    return mostrarEstado('Pega un webhook válido de Discord', 'error');
+  }
 
   mostrarEstado(`Leyendo archivo(s)...`);
   const setUrls = new Set();
@@ -162,121 +167,108 @@ async function procesarArchivos() {
   for (const file of input.files) {
     try {
       const texto = await file.text();
-      // Regex mejorado: captura https://cdn... hasta espacio, salto de línea o fin
-      // Permite & = ? y todos los caracteres típicos de parámetros
-      const urls = texto.match(/https:\/\/cdn\.discordapp\.com\/attachments\/[^ \n\r\t<>"'\\]+/gi) || [];
+      // Regex que captura links completos hasta espacio o fin de línea
+      const urls = texto.match(/https:\/\/cdn\.discordapp\.com\/attachments\/[^ \n\r\t<>"']+/gi) || [];
       urls.forEach(u => {
         if (esLinkTxtDiscord(u)) setUrls.add(u.trim());
       });
-    } catch (err) {
-      console.warn('Error leyendo:', err);
-    }
+    } catch {}
   }
 
   linksFiltrados = Array.from(setUrls);
   if (linksFiltrados.length === 0) {
-    mostrarEstado('No se encontraron links válidos .txt de cdn.discordapp.com', 'warning');
+    mostrarEstado('No se encontraron links .txt válidos', 'warning');
     previewEl.textContent = '';
     return;
   }
 
-  // Preview con enlaces completos
   previewEl.textContent = linksFiltrados.slice(0, 30).map((u,i) => `${i+1}. ${u}`).join('\n') +
-    (linksFiltrados.length > 30 ? `\n\n... y ${linksFiltrados.length - 30} más (total: ${linksFiltrados.length})` : '');
+    (linksFiltrados.length > 30 ? `\n\n... y ${linksFiltrados.length - 30} más` : '');
 
-  mostrarEstado(`Encontrados ${linksFiltrados.length} links completos → extrayendo...`);
+  mostrarEstado(`Encontrados ${linksFiltrados.length} links → descargando contenidos reales...`);
 
-  contenidosExtraidos = [];
+  archivosExtraidos = [];
   let exitosos = 0;
   let fallidos = 0;
 
   for (let i = 0; i < linksFiltrados.length; i++) {
     const url = linksFiltrados[i];
-    const nombre = url.split('/').pop().split('?')[0] || `extraido_${i+1}.txt`;
+    const nombre = url.split('/').pop().split('?')[0] || `archivo_${i+1}.txt`;
 
-    mostrarEstado(`Intentando ${i+1}/${linksFiltrados.length}: ${nombre}`);
+    mostrarEstado(`Descargando ${i+1}/${linksFiltrados.length}: ${nombre}`);
 
-    let obtenido = false;
-
-    // Intento 1: link completo (con parámetros)
     try {
-      const res = await fetch(url, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
+      const res = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-cache'
+      });
+
       if (res.ok) {
-        const texto = await res.text();
-        contenidosExtraidos.push({ nombre, contenido: texto });
+        const contenido = await res.text();
+        archivosExtraidos.push({ nombre, contenido });
         exitosos++;
-        obtenido = true;
-        mostrarEstado(`ÉXITO: ${nombre} (${texto.length} chars)`);
+        mostrarEstado(`Descargado OK → ${nombre} (${contenido.length} chars)`);
+      } else {
+        fallidos++;
+        mostrarEstado(`Fallo ${res.status} en ${nombre}`);
       }
-    } catch (e) {
-      // console.log('Fallo con firma:', e);
+    } catch (err) {
+      fallidos++;
+      mostrarEstado(`Error descarga: ${err.message} en ${nombre}`);
     }
 
-    // Intento 2: sin parámetros (si falla el primero)
-    if (!obtenido) {
-      const urlLimpia = url.split('?')[0];
-      try {
-        const res = await fetch(urlLimpia, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
-        if (res.ok) {
-          const texto = await res.text();
-          contenidosExtraidos.push({ nombre, contenido: texto });
-          exitosos++;
-          obtenido = true;
-          mostrarEstado(`ÉXITO (sin firma): ${nombre}`);
-        }
-      } catch (e) {
-        // console.log('Fallo sin firma:', e);
-      }
-    }
-
-    if (!obtenido) fallidos++;
-
-    // Pausa para no saturar navegador ni Discord
-    await new Promise(r => setTimeout(r, 5000 + Math.random() * 4000)); // 5–9 segundos
+    // Pausa para evitar bloqueo por rate limit
+    await new Promise(r => setTimeout(r, 4000 + Math.random() * 3000)); // 4–7 seg
   }
 
-  let resumen = `Extracción terminada:\nÉxitos: ${exitosos}\nFallidos: ${fallidos}`;
+  let resumen = `Descarga terminada:\nÉxitos: ${exitosos}\nFallidos: ${fallidos}`;
   if (exitosos === 0) {
-    resumen += `\n\nTodos fallaron → muy probablemente los links caducaron o fueron eliminados.\nPrueba abrir uno manualmente en el navegador.`;
+    resumen += `\n\nNingún archivo se pudo descargar → links caducados o eliminados.\nPrueba abrir uno manualmente en navegador.`;
+  } else {
+    resumen += `\n\nEnviando ${exitosos} archivos reales al webhook...`;
   }
 
   mostrarEstado(resumen, exitosos > 0 ? 'success' : 'error');
 
   if (exitosos > 0) {
-    const webhook = webhookEl.value.trim();
-    if (webhook && webhook.startsWith('https://discord.com/api/webhooks/')) {
-      mostrarEstado('Enviando los que se extrajeron...');
-      await enviarArchivosExtraidos();
-    } else {
-      mostrarEstado('Extracción lista. No hay webhook válido → puedes ver consola para más info.');
-    }
+    await enviarArchivosAlWebhook();
   }
 }
 
-async function enviarArchivosExtraidos() {
+async function enviarArchivosAlWebhook() {
   const webhook = webhookEl.value.trim();
   if (!webhook) return;
 
-  mostrarEstado(`Enviando ${contenidosExtraidos.length} archivos...`);
+  mostrarEstado(`Enviando ${archivosExtraidos.length} archivos reales como adjuntos...`);
 
-  for (let i = 0; i < contenidosExtraidos.length; i++) {
-    const { nombre, contenido } = contenidosExtraidos[i];
+  for (let i = 0; i < archivosExtraidos.length; i++) {
+    const { nombre, contenido } = archivosExtraidos[i];
     const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
     const formData = new FormData();
     formData.append('file', blob, nombre);
-    formData.append('payload_json', JSON.stringify({ content: `Lynox Hub • ${nombre}` }));
+    formData.append('payload_json', JSON.stringify({
+      content: `Lynox Hub - Archivo real descargado • ${nombre} • ${new Date().toLocaleString()}`
+    }));
 
     try {
-      await fetch(webhook, { method: 'POST', body: formData });
-      mostrarEstado(`Enviado ${i+1}/${contenidosExtraidos.length}: ${nombre}`);
-    } catch {}
-    await new Promise(r => setTimeout(r, 3000));
+      const res = await fetch(webhook, { method: 'POST', body: formData });
+      if (res.ok) {
+        mostrarEstado(`Enviado ${i+1}/${archivosExtraidos.length}: ${nombre}`);
+      } else {
+        mostrarEstado(`Error ${res.status} enviando ${nombre}`);
+      }
+      await new Promise(r => setTimeout(r, 2500)); // pausa anti-rate-limit
+    } catch (err) {
+      mostrarEstado(`Fallo envío ${nombre}: ${err.message}`);
+    }
   }
 
-  mostrarEstado('Envío terminado.', 'success');
+  mostrarEstado(`¡Proceso terminado! ${archivosExtraidos.length} archivos enviados al webhook.`, 'success');
 }
 
-document.getElementById('startSend').onclick = procesarArchivos;
+document.getElementById('startSend').onclick = procesarYEnviar;
 </script>
 </body>
 </html>
