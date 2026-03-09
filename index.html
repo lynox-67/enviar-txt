@@ -1,136 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LYNOX HUB - EXTRAER TXT (con retry sin firma) 🐱‍🚀</title>
-  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Press+Start+2P&family=Vt323&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --azul-fuerte: #0d47ff;
-      --azul-electrico: #00d4ff;
-      --azul-oscuro: #001f5c;
-      --cian-loco: #00ffff;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: linear-gradient(135deg, var(--azul-oscuro), #000428);
-      color: var(--cian-loco);
-      font-family: 'Vt323', monospace;
-      min-height: 100vh;
-      padding: 10px 5px;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="10" y="50" font-size="60" fill="%2300d4ff44">🐱</text></svg>'), repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,212,255,0.03) 10px, rgba(0,212,255,0.03) 20px);
-      background-attachment: fixed;
-    }
-    h1 {
-      font-family: 'Creepster', cursive;
-      font-size: 2.5rem;
-      text-align: center;
-      color: var(--azul-electrico);
-      text-shadow: 0 0 15px var(--cian-loco), 0 0 30px var(--azul-fuerte);
-      margin: 10px 0 5px;
-      letter-spacing: 2px;
-      animation: glitch 3s infinite;
-    }
-    @keyframes glitch {
-      0% { text-shadow: 1px 1px var(--cian-loco), -1px -1px var(--azul-fuerte); }
-      20% { text-shadow: -1px 1px var(--cian-loco), 1px -1px var(--azul-fuerte); }
-      40% { text-shadow: 1px -1px var(--cian-loco), -1px 1px var(--azul-fuerte); }
-      60% { text-shadow: -1px -1px var(--cian-loco), 1px 1px var(--azul-fuerte); }
-      80% { text-shadow: 1px 1px var(--cian-loco), -1px -1px var(--azul-fuerte); }
-      100% { text-shadow: -1px 1px var(--cian-loco), 1px -1px var(--azul-fuerte); }
-    }
-    .by { text-align: center; font-size: 1.2rem; color: #00ffffaa; margin-bottom: 10px; text-shadow: 0 0 8px #00ffff; font-family: 'Press Start 2P', cursive; }
-    .discord { text-align: center; font-size: 1rem; margin: 5px 0 15px; }
-    .discord a { color: #00ffff; text-decoration: none; font-weight: bold; border-bottom: 2px dashed #00ffff; padding-bottom: 2px; transition: all 0.3s; }
-    .discord a:hover { color: #ff00ff; border-color: #ff00ff; text-shadow: 0 0 10px #ff00ff; }
-    .container {
-      background: rgba(10, 10, 40, 0.85);
-      backdrop-filter: blur(8px);
-      border: 3px solid var(--azul-electrico);
-      border-radius: 12px;
-      padding: 20px 15px;
-      max-width: 700px;
-      margin: 0 auto 30px;
-      box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
-    }
-    input[type="file"], textarea {
-      background: #001133;
-      color: #00ffff;
-      border: 2px solid #00d4ff;
-      border-radius: 6px;
-      padding: 8px;
-      font-family: 'Vt323', monospace;
-      font-size: 1rem;
-      width: 100%;
-      margin: 8px 0;
-    }
-    button {
-      background: linear-gradient(45deg, #00d4ff, #0d47ff);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 8px;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 0 15px rgba(0,212,255,0.6);
-      transition: all 0.2s;
-      font-family: 'Press Start 2P', cursive;
-    }
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 25px rgba(0,212,255,0.9);
-    }
-    #startSend { background: linear-gradient(45deg, #00ff9d, #00d4ff); }
-    #status {
-      background: rgba(0,0,0,0.6);
-      padding: 10px;
-      border-radius: 8px;
-      margin: 15px 0;
-      font-size: 1rem;
-      border-left: 6px solid var(--cian-loco);
-      white-space: pre-line;
-    }
-    #preview {
-      background: #000d22;
-      border: 2px dashed #00ffff;
-      border-radius: 8px;
-      padding: 15px;
-      font-size: 1rem;
-      max-height: 300px;
-      overflow-y: auto;
-      margin-top: 20px;
-      color: #aaffff;
-    }
-    .footer { text-align: center; font-size: 1rem; color: #00ffff88; margin-top: 30px; text-shadow: 0 0 8px #00ffff; }
-  </style>
-</head>
-<body>
-<div class="container">
-  <h1>LYNOX HUB - EXTRAER TXT (retry sin firma) 🐱‍💻</h1>
-  <div class="by">HECHO POR LYNX LOCO CON GARRAS AZULES</div>
-  <div class="discord">Únete al caos → <a href="https://discord.gg/spWx8vKT" target="_blank">discord.gg/spWx8vKT</a> 🐾</div>
-  <p style="font-size:1rem; text-align:center; margin:15px 0;">
-    Sube tu txt con 1965 links → intenta extraer contenido → reintenta sin parámetros expirados<br>
-    <small>(la mayoría caducaron, pero probamos ambas versiones del link)</small>
-  </p>
-  <input type="file" id="fileInput" accept=".txt" multiple>
-  <label for="webhook">Webhook Discord (opcional, solo uno):</label>
-  <textarea id="webhook" placeholder="https://discord.com/api/webhooks/... (si quieres enviar lo extraído)"></textarea>
-  <div style="text-align:center; margin:20px 0;">
-    <button id="startSend">INICIAR EXTRACCIÓN (lento pero seguro) 🐱‍🚀</button>
-  </div>
-  <div id="status">Listo... suelta tu txt de 1965 links 🔥</div>
-  <div id="preview"></div>
-</div>
-<div class="footer">
-  LYN0X HUB - REY DEL AZUL SALVAJE 2026 🐾💙
-</div>
-
 <script>
 let linksFiltrados = [];
 let contenidosExtraidos = [];
+
 const statusEl = document.getElementById('status');
 const previewEl = document.getElementById('preview');
 const webhookEl = document.getElementById('webhook');
@@ -144,6 +15,7 @@ function esLinkTxtDiscord(url) {
   try {
     const u = url.toLowerCase();
     if (!u.startsWith('https://cdn.discordapp.com/attachments/')) return false;
+    // Aceptamos hasta el final del hm=... (incluyendo & si hay más params)
     const path = u.split('?')[0];
     return path.endsWith('.txt');
   } catch {
@@ -161,58 +33,61 @@ async function procesarArchivos() {
   for (const file of input.files) {
     try {
       const texto = await file.text();
-      const urls = texto.match(/https?:\/\/[^\s<>"'()]+/gi) || [];
+      // Regex mejorado: captura URLs completas hasta espacio o fin de línea, permitiendo & y =
+      const urls = texto.match(/https:\/\/cdn\.discordapp\.com\/attachments\/[^ \n\r\t<>"']+/gi) || [];
       urls.forEach(u => {
         if (esLinkTxtDiscord(u)) setUrls.add(u.trim());
       });
-    } catch {}
+    } catch (err) {
+      console.warn('Error leyendo:', err);
+    }
   }
 
   linksFiltrados = Array.from(setUrls);
   if (linksFiltrados.length === 0) {
-    mostrarEstado('No se encontraron links .txt válidos', 'warning');
+    mostrarEstado('No se encontraron links válidos .txt de cdn.discordapp.com', 'warning');
     previewEl.textContent = '';
     return;
   }
 
-  previewEl.textContent = linksFiltrados.slice(0, 30).map((u,i)=>`${i+1}. ${u}`).join('\n') +
-    (linksFiltrados.length > 30 ? `\n\n... y ${linksFiltrados.length-30} más (total: ${linksFiltrados.length})` : '');
+  // Mostrar preview con links completos
+  previewEl.textContent = linksFiltrados.slice(0, 30).map((u,i) => `${i+1}. ${u}`).join('\n') +
+    (linksFiltrados.length > 30 ? `\n\n... y ${linksFiltrados.length - 30} más (total: ${linksFiltrados.length})` : '');
 
-  mostrarEstado(`Encontrados ${linksFiltrados.length} links → extrayendo (puede tardar mucho)...`);
+  mostrarEstado(`Encontrados ${linksFiltrados.length} links completos → extrayendo (puede tardar)...`);
 
   contenidosExtraidos = [];
   let exitosos = 0;
   let fallidos = 0;
-  let detalles = [];
 
   for (let i = 0; i < linksFiltrados.length; i++) {
-    const urlOriginal = linksFiltrados[i];
-    const nombre = urlOriginal.split('/').pop().split('?')[0] || `txt_${i+1}.txt`;
+    const url = linksFiltrados[i];
+    const nombre = url.split('/').pop().split('?')[0] || `extraido_${i+1}.txt`;
 
-    mostrarEstado(`Probando ${i+1}/${linksFiltrados.length}: ${nombre}`);
+    mostrarEstado(`Intentando ${i+1}/${linksFiltrados.length}: ${nombre}`);
 
     let obtenido = false;
 
-    // Intento 1: con parámetros originales (firma)
+    // Intento 1: link completo original
     try {
-      let res = await fetch(urlOriginal, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
+      const res = await fetch(url, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
       if (res.ok) {
-        const contenido = await res.text();
-        contenidosExtraidos.push({ nombre, contenido });
+        const texto = await res.text();
+        contenidosExtraidos.push({ nombre, contenido: texto });
         exitosos++;
         obtenido = true;
-        mostrarEstado(`ÉXITO (con firma): ${nombre}`);
+        mostrarEstado(`ÉXITO: ${nombre} (${texto.length} chars)`);
       }
     } catch {}
 
-    // Intento 2: sin parámetros (versión limpia)
+    // Intento 2: sin parámetros de firma (si el 1 falló)
     if (!obtenido) {
-      const urlLimpia = urlOriginal.split('?')[0];
+      const urlLimpia = url.split('?')[0];
       try {
-        let res = await fetch(urlLimpia, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
+        const res = await fetch(urlLimpia, { mode: 'cors', credentials: 'omit', cache: 'no-cache' });
         if (res.ok) {
-          const contenido = await res.text();
-          contenidosExtraidos.push({ nombre, contenido });
+          const texto = await res.text();
+          contenidosExtraidos.push({ nombre, contenido: texto });
           exitosos++;
           obtenido = true;
           mostrarEstado(`ÉXITO (sin firma): ${nombre}`);
@@ -220,57 +95,45 @@ async function procesarArchivos() {
       } catch {}
     }
 
-    if (!obtenido) {
-      fallidos++;
-      detalles.push(nombre + ' → falló ambas versiones');
-    }
+    if (!obtenido) fallidos++;
 
-    // Pausa para no saturar el navegador ni el CDN
-    await new Promise(r => setTimeout(r, 4000 + Math.random()*3000)); // 4–7 segundos
+    await new Promise(r => setTimeout(r, 5000 + Math.random() * 4000)); // 5–9 segundos pausa
   }
 
-  let resumen = `Extracción terminada:\nÉxitos: ${exitosos} de ${linksFiltrados.length}\nFallidos: ${fallidos}`;
-  if (fallidos > 0 && exitosos === 0) {
-    resumen += `\n\nTodos fallaron (ambas versiones).\nMuy probablemente los links caducaron o fueron eliminados.\nPrueba manualmente uno en el navegador.`;
+  let resumen = `Extracción terminada:\nÉxitos: ${exitosos}\nFallidos: ${fallidos}`;
+  if (exitosos === 0) {
+    resumen += `\n\nTodos fallaron → links caducados o eliminados (prueba manual uno en navegador).`;
   }
 
   mostrarEstado(resumen, exitosos > 0 ? 'success' : 'error');
 
-  if (exitosos > 0) {
-    const webhook = webhookEl.value.trim();
-    if (webhook && webhook.startsWith('https://discord.com/api/webhooks/')) {
-      mostrarEstado('Enviando los archivos que sí se extrajeron...');
-      await enviarArchivosExtraidos();
-    } else {
-      mostrarEstado('¡Listo! Se extrajeron algunos. No hay webhook → puedes descargarlos manualmente desde consola si quieres.');
-    }
+  if (exitosos > 0 && webhookEl.value.trim()) {
+    await enviarArchivosExtraidos();
   }
 }
 
 async function enviarArchivosExtraidos() {
   const webhook = webhookEl.value.trim();
-  if (!webhook) return;
+  if (!webhook) return mostrarEstado('No hay webhook → extracción lista, pero no se envía.');
+
+  mostrarEstado(`Enviando ${contenidosExtraidos.length} archivos...`);
 
   for (let i = 0; i < contenidosExtraidos.length; i++) {
     const { nombre, contenido } = contenidosExtraidos[i];
     const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
     const formData = new FormData();
     formData.append('file', blob, nombre);
-    formData.append('payload_json', JSON.stringify({ content: `Lynox Hub - ${nombre}` }));
+    formData.append('payload_json', JSON.stringify({ content: `Lynox Hub • ${nombre}` }));
 
     try {
-      const res = await fetch(webhook, { method: 'POST', body: formData });
-      if (res.ok) {
-        mostrarEstado(`Enviado ${i+1}/${contenidosExtraidos.length}: ${nombre}`);
-      }
-      await new Promise(r => setTimeout(r, 2500));
+      await fetch(webhook, { method: 'POST', body: formData });
+      mostrarEstado(`Enviado ${i+1}/${contenidosExtraidos.length}: ${nombre}`);
     } catch {}
+    await new Promise(r => setTimeout(r, 3000));
   }
 
-  mostrarEstado('Envío terminado (los que se pudieron extraer).', 'success');
+  mostrarEstado('Envío finalizado (los que se extrajeron).', 'success');
 }
 
 document.getElementById('startSend').onclick = procesarArchivos;
 </script>
-</body>
-</html>
