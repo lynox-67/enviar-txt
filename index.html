@@ -1,96 +1,97 @@
--- [[ NEOSNAPP ADVANCED BYPASS & DUMP SYSTEM ]] --
--- Amaç: Polsec/Luarmor gibi API korumalarını aşmak ve ham kodu yakalamak.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sources Hub Dumper</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        body { margin:0; padding:0; font-family:'Inter',sans-serif; background:linear-gradient(135deg,#0f0f23,#1a1a2e); color:#fff; min-height:100vh; }
+        header { background:rgba(0,0,0,0.7); backdrop-filter:blur(12px); padding:2rem; text-align:center; border-bottom:3px solid #00ff9d; }
+        h1 { margin:0; font-size:2.8rem; color:#00ff9d; }
+        .container { max-width:1100px; margin:2rem auto; padding:2rem; }
+        textarea { width:100%; height:450px; background:#111827; border:2px solid #00ff9d; border-radius:12px; color:#fff; padding:1.5rem; font-family:monospace; resize:vertical; }
+        button { background:#00ff9d; color:#000; font-weight:600; padding:1.2rem 3rem; border:none; border-radius:50px; font-size:1.2rem; cursor:pointer; margin:1rem 0.5rem; }
+        button:hover { transform:scale(1.05); }
+        .output { margin-top:2rem; background:#111827; padding:2rem; border-radius:12px; border:2px solid #00ff9d; white-space:pre-wrap; font-family:monospace; overflow:auto; max-height:550px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sources Hub Dumper</h1>
+        <p>Luraph v14.7 • Supports loadstring & Obfuscated Code</p>
+    </header>
 
-local G = getgenv and getgenv() or _G
-local workspace = syn and syn.write_file or writefile
-local http_service = game:GetService("HttpService")
+    <div class="container">
+        <h2>Paste your obfuscated code or loadstring here</h2>
+        <textarea id="input" placeholder="Example: loadstring('...long code...') or just the raw return({h9=function... script"></textarea>
+        
+        <div style="text-align:center; margin:20px 0;">
+            <button onclick="generateDumper()">🚀 Generate Sources Hub Dumper</button>
+            <button onclick="clearAll()">Clear</button>
+        </div>
 
--- 1. ADIM: GELİŞMİŞ LOGLAMA VE KAYIT SİSTEMİ
-local function DumpData(tag, data)
-    if not data or #tostring(data) < 5 then return end
+        <h2 style="color:#00ff9d;">✅ Generated Script (Copy & Paste into Delta)</h2>
+        <div id="output" class="output">Generated dumper will appear here...</div>
 
-    local id = math.random(1000, 9999)
-    local fileName = string.format("NEOSNAPPPOLSEC%s_%d.lua", tag, id)
+        <p style="margin-top:20px; text-align:center; color:#00ff9d;">
+            After copying → Paste everything into Delta Executor → Execute<br>
+            Wait 5-20 seconds → Check workspace for SOURCES_HUB_DUMP_ files
+        </p>
+    </div>
 
-    local content = "-- [[ DUMPED FROM %s ]]\n-- [[ TIMESTAMP: %s ]]\n\n%s"
-    content = string.format(content, tag, os.date("%X"), tostring(data))
+    <script>
+        function generateDumper() {
+            const code = document.getElementById('input').value.trim();
+            const outputDiv = document.getElementById('output');
 
-    writefile(fileName, content)
-    warn("(!) Veri Yakalandı: " .. fileName)
+            if (!code) {
+                outputDiv.innerHTML = `<span style="color:#ff6666">Please paste your obfuscated code or loadstring first.</span>`;
+                return;
+            }
+
+            const fullScript = `-- ========================================
+-- SOURCES HUB DUMPER - Luraph v14.7
+-- Generated: ${new Date().toLocaleString()}
+-- ========================================
+
+print("==========================================")
+print("   SOURCES HUB DUMPER STARTED")
+print("==========================================")
+
+local old_loadstring = loadstring
+
+loadstring = function(src)
+    if src and #src > 200 then
+        print("🔥 DECRYPTED CODE FOUND! (" .. #src .. " characters)")
+        
+        local filename = "SOURCES_HUB_DUMP_" .. os.date("%Y%m%d_%H%M%S") .. ".lua"
+        
+        writefile(filename, "-- Sources Hub Dump - " .. os.date("%Y-%m-%d %H:%M:%S") .. "\\n\\n" .. src)
+        
+        print("✅ DUMP SAVED → " .. filename)
+        print("Go to Delta → File Manager → workspace")
+    end
+    return old_loadstring(src)
 end
 
--- 2. ADIM: ANTI-KICK & ANTI-TAMPER BYPASS
--- Metamethod üzerinden Kick ve koruma kontrollerini engeller.
-local old_nm
-old_nm = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
+print("✅ Dumper ready. Running your script now...\\n")
 
-    if not checkcaller() then
-        if method == "Kick" or method == "kick" then
-            warn(">>> Kick Engellendi: " .. tostring(args[1] or "Sebep belirtilmedi"))
-            return nil
-        end
+-- ========================================
+-- YOUR CODE STARTS HERE
+-- ========================================
 
-        -- Bazı scriptler 'Detected' adında bir event ateşler, bunu susturuyoruz:
-        if method == "FireServer" and tostring(self) == "Detected" then
-            warn(">>> Anti-Tamper Algılaması Susturuldu!")
-            return nil
-        end
-    end
-    return old_nm(self, ...)
-end)
+` + code + `
 
--- 3. ADIM: API KANCALARI (HOOKS)
--- Polsec genelde veriyi HttpGet üzerinden çeker ve loadstring ile çalıştırır.
+print("\\n✅ Execution finished. Check workspace folder for dumps.")`;
 
--- HttpGet Hook (Sunucudan inen şifreli veya ham veri)
-local old_http
-old_http = hookfunction(game.HttpGet, function(self, url, ...)
-    local response = old_http(self, url, ...)
-    if response then
-        DumpData("HTTP_RAW", response)
-    end
-    return response
-end)
+            outputDiv.textContent = fullScript;
+        }
 
--- Loadstring Hook (En kritik nokta: Kodun çalışmadan önceki son hali)
-local old_ls
-old_ls = hookfunction(loadstring, function(source, chunk)
-    if source then
-        DumpData("SOURCE_CODE", source)
-    end
-    return old_ls(source, chunk)
-end)
-
--- Task.spawn/defer Hook (Bazı API'lar kodu direkt çalıştırmak yerine kuyruğa atar)
-local old_spawn
-old_spawn = hookfunction(task.spawn, function(f, ...)
-    if type(f) == "string" then
-        DumpData("SPAWN_STRING", f)
-    end
-    return old_spawn(f, ...)
-end)
-
--- 4. ADIM: ANTI-DUMP BYPASS (getgc ve getprotos koruması)
--- Eğer script kendi fonksiyonlarını gizlemeye çalışırsa:
-if getgenv().setreadonly then
-    setreadonly(debug, false)
-end
-
-local old_info
-old_info = hookfunction(debug.info, function(f, what, ...)
-    if not checkcaller() and what == "s" then
-        return "Protected_Source" -- Dump araçlarını yanıltmak için
-    end
-    return old_info(f, what, ...)
-end)
-
--- 5. ADIM: CRASH ENGELLEYİCİ
--- Script hata verip oyunu kapatmaya çalışırsa (Crash-protection)
-setfflag("TaskSchedulerTargetFps", 999) -- FPS limitini kaldırarak donmayı azaltır
-
-print("------------------------------------------")
-print("NEOSNAPP HUB - Polsec Bypass Aktif!")
-print("Scripti çalıştırın, veriler 'workspace' klasörüne kaydedilecek.")
-print("------------------------------------------")
+        function clearAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('output').textContent = 'Generated dumper will appear here...';
+        }
+    </script>
+</body>
+</html>
