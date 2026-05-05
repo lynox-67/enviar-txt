@@ -1,339 +1,552 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔗 SHADOW LINK • TikTok Hunter</title>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Source Hub — Env Logger</title>
+    <meta name="description" content="Source Hub Env Logger — paste your loadstring and instantly generate a logged Lua script." />
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        
-        :root { --green: #00ff41; --dark: #0a0a0a; --gray: #111111; }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            background: #000;
-            color: var(--green);
-            font-family: 'VT323', monospace;
-            line-height: 1.4;
-            overflow-x: hidden;
-            background-image: 
-                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
-        
-        .scanline {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 65, 0.08) 50%);
-            background-size: 100% 6px;
-            pointer-events: none;
-            animation: scan 4s linear infinite;
-            z-index: 1;
-            opacity: 0.15;
-        }
-        
-        @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
-        
-        .container { max-width: 1000px; margin: 40px auto; padding: 20px; position: relative; z-index: 2; }
-        
-        header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid var(--green); padding-bottom: 20px; }
-        
-        .title {
-            font-size: 4.2rem;
-            letter-spacing: 8px;
-            text-shadow: 0 0 10px var(--green), 0 0 20px var(--green), 0 0 40px var(--green);
-            animation: glitch 1.5s infinite;
-        }
-        
-        @keyframes glitch {
-            0% { text-shadow: 2px 2px var(--green), -2px -2px #ff00ff; }
-            20% { text-shadow: -2px -2px var(--green), 2px 2px #00ffff; }
-            40% { text-shadow: 2px -2px var(--green), -2px 2px #ffff00; }
-            60% { text-shadow: -2px 2px var(--green), 2px -2px #ff00ff; }
-            80% { text-shadow: 2px 2px var(--green), -2px -2px #00ffff; }
-            100% { text-shadow: -2px -2px var(--green), 2px 2px #ffff00; }
-        }
-        
-        .subtitle { font-size: 1.4rem; opacity: 0.8; letter-spacing: 4px; }
-        
-        .terminal {
-            background: #111;
-            border: 3px solid var(--green);
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
-            min-height: 520px;
-            position: relative;
-        }
-        
-        .terminal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px dashed var(--green);
-            padding-bottom: 10px; font-size: 1.3rem;
-        }
-        
-        .mode-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        
-        .tab {
-            flex: 1; padding: 12px; text-align: center; background: #000;
-            border: 2px solid var(--green); color: var(--green);
-            cursor: pointer; font-size: 1.4rem; transition: all 0.2s;
-        }
-        
-        .tab.active {
-            background: var(--green); color: #000; box-shadow: 0 0 20px var(--green);
-        }
-        
-        .input-group { display: flex; gap: 12px; margin-bottom: 20px; }
-        
-        input, select {
-            flex: 1; background: #000; border: 2px solid var(--green);
-            color: var(--green); font-family: 'VT323', monospace;
-            font-size: 1.5rem; padding: 14px 18px; outline: none;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
-        }
-        
-        input:focus, select:focus { box-shadow: 0 0 25px var(--green); }
-        
-        button {
-            background: #000; color: var(--green); border: 3px solid var(--green);
-            padding: 14px 32px; font-family: 'VT323', monospace;
-            font-size: 1.6rem; cursor: pointer; transition: all 0.2s;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
-        }
-        
-        button:hover {
-            background: var(--green); color: #000;
-            transform: scale(1.05); box-shadow: 0 0 30px var(--green);
-        }
-        
-        .status { font-size: 1.3rem; margin: 15px 0; min-height: 28px; }
-        
-        .links-list {
-            max-height: 380px; overflow-y: auto; font-size: 1.4rem;
-            line-height: 1.8;
-        }
-        
-        .link-item {
-            padding: 8px 0; border-bottom: 1px dotted rgba(0, 255, 65, 0.3);
-            word-break: break-all; display: flex; align-items: center; gap: 12px;
-        }
-        
-        .link-item:hover { background: rgba(0, 255, 65, 0.1); }
-        
-        .no-links {
-            text-align: center; opacity: 0.6; font-size: 1.6rem; padding: 60px 0;
-        }
-        
-        .download-section {
-            margin-top: 25px;
-            padding: 15px;
-            border: 2px dashed var(--green);
-            background: rgba(0, 255, 65, 0.05);
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        footer { text-align: center; margin-top: 40px; font-size: 1.1rem; opacity: 0.5; }
-        
-        .blink { animation: blink 1s step-end infinite; }
+      :root {
+        --background: #0a0204;
+        --foreground: #ffe9ec;
+        --muted-foreground: #a87a82;
+        --brand: #e11d48;
+        --brand-glow: #ff3b5c;
+      }
+      body {
+        background: radial-gradient(ellipse at top, #2a0510 0%, #0a0204 60%, #050102 100%);
+        color: var(--foreground);
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+      }
+      .grid-bg {
+        background-image:
+          linear-gradient(rgba(225, 29, 72, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(225, 29, 72, 0.08) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+      .glow-text { text-shadow: 0 0 30px rgba(255, 59, 92, 0.5); }
+      .glow-border { box-shadow: 0 0 20px rgba(225, 29, 72, 0.3); }
+      .card-surface { background: rgba(20, 5, 10, 0.6); backdrop-filter: blur(12px); }
+      .bg-brand { background-color: var(--brand); }
+      .bg-brand-glow { background-color: var(--brand-glow); }
+      .text-brand-glow { color: var(--brand-glow); }
+      .border-brand\/20 { border-color: rgba(225, 29, 72, 0.2); }
+      .border-brand\/15 { border-color: rgba(225, 29, 72, 0.15); }
+      .border-brand\/30 { border-color: rgba(225, 29, 72, 0.3); }
+      .border-brand\/40 { border-color: rgba(225, 29, 72, 0.4); }
+      .bg-brand\/5 { background-color: rgba(225, 29, 72, 0.05); }
+      .bg-brand\/10 { background-color: rgba(225, 29, 72, 0.1); }
+      .bg-brand\/20 { background-color: rgba(225, 29, 72, 0.2); }
+      .bg-brand\/30 { background-color: rgba(225, 29, 72, 0.3); }
+      .ring-brand\/40 { --tw-ring-color: rgba(225, 29, 72, 0.4); }
+      .hover\:bg-brand-glow:hover { background-color: var(--brand-glow); }
+      .hover\:bg-brand\/20:hover { background-color: rgba(225, 29, 72, 0.2); }
+      .text-muted-foreground { color: var(--muted-foreground); }
+      textarea:focus { outline: none; border-color: rgba(225,29,72,0.6); box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.3); }
     </style>
-</head>
-<body>
-    <div class="scanline"></div>
-    
-    <div class="container">
-        <header>
-            <div class="title">SHADOW LINK</div>
-            <div class="subtitle">TIKTOK COMMENT HUNTER v2.2 • DOWNLOAD ENABLED</div>
-            <p style="margin-top: 10px; opacity: 0.7; font-size: 1.3rem;">
-                🔥 Video o Búsqueda • Extrae https:// • DESCARGA DIRECTA EN ARCHIVO
-            </p>
+  </head>
+  <body>
+    <main class="relative min-h-screen overflow-hidden">
+      <div class="absolute inset-0 grid-bg opacity-60 pointer-events-none"></div>
+      <div class="absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand/30 blur-[140px] pointer-events-none"></div>
+      <div class="relative mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-10">
+
+        <!-- Header -->
+        <header class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/20 ring-1 ring-brand/40 glow-border">
+              <span class="h-2.5 w-2.5 rounded-full bg-brand-glow" style="box-shadow: 0 0 12px var(--brand-glow);"></span>
+            </div>
+            <div>
+              <h1 class="text-lg font-semibold tracking-tight">Source Hub</h1>
+              <p class="text-xs text-muted-foreground">Env Logger</p>
+            </div>
+          </div>
+          <a href="https://discord.gg/sourceshub" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-glow" style="box-shadow: 0 0 20px var(--brand-glow);">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+              <path d="M20.317 4.369A19.79 19.79 0 0 0 16.558 3.2a.07.07 0 0 0-.073.035c-.211.375-.444.864-.608 1.249a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.249.07.07 0 0 0-.073-.035A19.74 19.74 0 0 0 5.683 4.369a.06.06 0 0 0-.029.025C2.118 9.59 1.146 14.65 1.624 19.65a.08.08 0 0 0 .031.055 19.9 19.9 0 0 0 5.993 3.03.07.07 0 0 0 .076-.026c.462-.63.873-1.295 1.226-1.994a.07.07 0 0 0-.038-.098 13.1 13.1 0 0 1-1.872-.892.07.07 0 0 1-.007-.117c.126-.094.252-.192.371-.291a.07.07 0 0 1 .073-.01c3.927 1.793 8.18 1.793 12.061 0a.07.07 0 0 1 .074.009c.12.099.245.198.372.292a.07.07 0 0 1-.006.117 12.3 12.3 0 0 1-1.873.891.07.07 0 0 0-.038.099c.36.699.772 1.363 1.225 1.993a.07.07 0 0 0 .076.027 19.84 19.84 0 0 0 6.002-3.03.07.07 0 0 0 .03-.054c.5-5.78-.838-10.8-3.548-15.256a.06.06 0 0 0-.028-.026zM8.02 16.61c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.095 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.974 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"></path>
+            </svg>
+            Discord
+          </a>
         </header>
 
-        <div class="terminal">
-            <div class="terminal-header">
-                <div>root@shadowlink:~# ./tiktok_hunter.py</div>
-                <div class="blink">[ LIVE ]</div>
+        <!-- Hero -->
+        <section class="mt-16 text-center">
+          <h2 class="text-4xl sm:text-5xl font-bold tracking-tight glow-text">Source Hub <span class="text-brand-glow">Env Logger</span></h2>
+          <p class="mt-4 text-sm sm:text-base max-w-xl mx-auto" style="color: rgba(255,233,236,0.7);">
+            Paste your loadstring below. We'll wrap it with the environment logger so every API call is captured to
+            <code class="text-brand-glow">logged.txt</code>.
+          </p>
+        </section>
+
+        <!-- Form -->
+        <section class="mt-10">
+          <form id="form" class="card-surface rounded-2xl p-6 sm:p-8 border border-brand/20">
+            <label for="loadstring" class="block text-sm font-medium mb-2">Loadstring</label>
+            <textarea id="loadstring" rows="5" placeholder='loadstring(game:HttpGet("https://example.com/script.lua"))()' class="w-full resize-none rounded-xl border border-brand/20 px-4 py-3 font-mono text-sm" style="background: rgba(10,2,4,0.6); color: var(--foreground);"></textarea>
+            <div class="mt-4 flex justify-end">
+              <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-glow" style="box-shadow: 0 0 25px var(--brand-glow);">Submit</button>
             </div>
+          </form>
+        </section>
 
-            <!-- Modo Tabs -->
-            <div class="mode-tabs">
-                <div class="tab active" onclick="switchMode(0)" id="tab-single">📼 VIDEO ÚNICO</div>
-                <div class="tab" onclick="switchMode(1)" id="tab-search">🔎 BÚSQUEDA KEYWORDS</div>
+        <!-- How to use -->
+        <section class="mt-8 card-surface rounded-2xl border border-brand/20 p-6 sm:p-8">
+          <div class="flex items-center gap-2 mb-5">
+            <span class="h-2 w-2 rounded-full bg-brand-glow" style="box-shadow: 0 0 8px var(--brand-glow);"></span>
+            <h3 class="text-base font-semibold tracking-tight">How to use</h3>
+          </div>
+          <ol class="space-y-3 text-sm" style="color: rgba(255,233,236,0.8);">
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 ring-1 ring-brand/40 text-xs font-semibold text-brand-glow">1</span>
+              <span class="pt-0.5">Execute the generated loadstring in your executor.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 ring-1 ring-brand/40 text-xs font-semibold text-brand-glow">2</span>
+              <span class="pt-0.5">Let it run for 2–10 minutes so the logger can capture API calls.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 ring-1 ring-brand/40 text-xs font-semibold text-brand-glow">3</span>
+              <span class="pt-0.5">Open your executor's workspace folder.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 ring-1 ring-brand/40 text-xs font-semibold text-brand-glow">4</span>
+              <span class="pt-0.5">Locate the file named <code class="text-brand-glow">logged.txt</code>.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 ring-1 ring-brand/40 text-xs font-semibold text-brand-glow">5</span>
+              <span class="pt-0.5">Copy the entire contents of <code class="text-brand-glow">logged.txt</code>.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 ring-1 ring-brand/40 text-xs font-semibold text-brand-glow">6</span>
+              <span class="pt-0.5">Paste it into an AI model (ChatGPT, Claude, Gemini, Grok, etc.) and ask it to reconstruct the original script from the logged environment calls.</span>
+            </li>
+          </ol>
+          <div class="mt-5 rounded-xl border border-brand/20 bg-brand/5 p-4 text-xs" style="color: rgba(255,233,236,0.7);">
+            <span class="font-semibold text-brand-glow">Tip:</span>
+            The longer you let the script run, the more complete the log will be — giving the AI more context to accurately reconstruct the source.
+          </div>
+        </section>
+
+        <!-- Output -->
+        <section id="outputSection" class="mt-8 card-surface rounded-2xl border border-brand/20 overflow-hidden hidden">
+          <div class="flex items-center justify-between gap-3 border-b border-brand/15 px-5 py-3">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-brand-glow" style="box-shadow: 0 0 8px var(--brand-glow);"></span>
+              <span class="text-sm font-medium">logger.lua</span>
             </div>
-
-            <!-- Formulario Video Único -->
-            <div id="form-single">
-                <div class="input-group">
-                    <input type="text" id="videoUrl" placeholder="https://www.tiktok.com/@usuario/video/1234567890123456789" value="">
-                    <button onclick="extraerLinks()">SCAN VIDEO</button>
-                </div>
+            <div class="flex items-center gap-2">
+              <button id="copyBtn" class="inline-flex items-center gap-1.5 rounded-lg border border-brand/30 bg-brand/10 px-3 py-1.5 text-xs font-medium hover:bg-brand/20 transition">Copy</button>
+              <button id="downloadBtn" class="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-glow transition" style="box-shadow: 0 0 15px var(--brand-glow);">Download</button>
             </div>
+          </div>
+          <pre id="output" class="max-h-[420px] overflow-auto p-5 text-xs leading-relaxed font-mono" style="color: rgba(255,233,236,0.85); background: rgba(10,2,4,0.4);"></pre>
+        </section>
 
-            <!-- Formulario Búsqueda -->
-            <div id="form-search" style="display: none;">
-                <div class="input-group">
-                    <input type="text" id="keywords" placeholder="frezze trade, método Moreira" value="frezze trade, método Moreira">
-                    <select id="maxVideos">
-                        <option value="10">10 vídeos</option>
-                        <option value="20" selected>20 vídeos</option>
-                        <option value="30">30 vídeos</option>
-                    </select>
-                    <button onclick="extraerLinks()">SCAN SEARCH</button>
-                </div>
-            </div>
-
-            <!-- Status -->
-            <div id="status" class="status"></div>
-
-            <!-- Resultados -->
-            <div id="results">
-                <div id="linksContainer" class="links-list"></div>
-            </div>
-        </div>
-
-        <footer>
-            ✅ SÍ SE PUEDE DESCARGAR EN ARCHIVO • TXT + CSV • 100% local • 2026
+        <!-- Footer -->
+        <footer class="mt-auto pt-12 text-center text-xs" style="color: rgba(255,233,236,0.4);">
+          © <span id="year"></span> Source Hub · Env Logger
         </footer>
-    </div>
+
+      </div>
+    </main>
+
+    <!-- Lua template stored as plain text so no escaping issues -->
+    <script id="lua-template" type="text/plain">print("[made by Kyroxx on dc]")
+writefile('logged.txt','\nlocal Players = game:GetService("Players")\nlocal GameSettings = game:GetService("GameSettings")\nlocal LocalizationService = game:GetService("LocalizationService")\nlocal WebSocketService = game:GetService("WebSocketService")\nlocal WebSocketClient = game:GetService("WebSocketClient")\nlocal HttpService = game:GetService("HttpService")\nlocal UserInputService = game:GetService("UserInputService")\nlocal RunService = game:GetService("RunService")\nlocal TeleportService = game:GetService("TeleportService")\n')
+
+local function isuilib()
+ local a = debug.traceback()
+ local b = a:lower():gsub('%s+','')
+ return b:find('windui') or b:find('rayfield') or b:find('obsidian') or b:find('interface') or b:find('luna') or b:find('fluent') or b:find('drday')
+end
+
+local function formatlog(text)
+ if type(text) ~= 'string' then
+  error('Bad agrument #1 to formatlog "string" expected, got: '..type(text))
+  return
+ end
+ return text:gsub('table: ',''):gsub('function: ',''):gsub('Ugc','game'):gsub('\n',''):gsub('%s%s+',';'):gsub('""',''):gsub('Data Ping', 'DataPing'):gsub('Workspace','workspace'):gsub('game.Players','Players'):gsub('Teleport Service','TeleportService'):gsub('Run Service','RunService'):gsub('HttpGetAsync','HttpGet'):gsub('"',"'")
+end
+
+local function tblformat(tbl, depth)
+ local depth = depth or 0
+ local res = ''
+ local first = true
+ if depth > 5 then return 'too big to display' end
+ if type(tbl) ~= 'table' then
+  res = '"'..tostring(tbl)..'"'
+  if res == '"nil"' then
+   res = ''
+  end
+  return res
+ end
+ for i, v in pairs(tbl) do
+  if not first then res = res .. ', ' end
+  first = false
+  if type(i) == 'string' then
+   res = res .. i .. ' = '
+  end
+  if type(i) == 'table' then
+   res = res .. tblformat(v, depth + 1)
+  else
+   res = res .. tostring(v)
+  end
+ end
+ return res .. ''
+end
+
+local Track = {}
+local kirked = {}
+local function kirk(fem, boy)
+ return fem .. ';' .. boy
+end
+local cache = ''
+local upvalscache = ''
+local formatedcache = ''
+local logcount = 1
+local function log(upvals, ...)
+ upvals = upvals or 'nil'
+ upvals = formatlog(tostring(upvals))
+ if #upvals > 100 then
+  local holder = #upvals
+  upvals = upvals:sub(1,50) .. '... (' .. holder .. ' character remaining)'
+ end
+ local args = ...
+ local formated = formatlog(tostring(args))
+ local logged = formated
+ if logged == cache then
+  return
+ end
+ if formated == formatedcache and upvals == upvalscache then
+  return
+ end
+ local charliekirk = kirk(logged, upvals)
+ if kirked[charliekirk] then
+  return
+ end
+ if upvals:find('Signal') then
+  logged = formated .. ':Connect(function(...)end)'
+ end
+ if logged:find('game:HttpGet') then
+  logged = 'loadstring('..formated..')()'
+ end
+ if logcount > 36000 then
+  game:shutdown()
+  return
+ end
+ if logged:find('IsA') then
+  return
+ end
+ logcount += 1
+ cache = logged
+ upvalscache = upvals
+ formatedcache = formated
+ kirked[charliekirk] = true
+ appendfile('logged.txt',logged..'\n')
+end
+
+isfunctionhooked = nil
+restorefunction = nil
+
+function GlobalScan()
+ for i, v in pairs(_G) do
+  log('_G Scan', '_G.'..i..' = '..tblformat(v))
+ end
+end
+
+function GenvScan()
+ for i, v in pairs(getgenv()) do
+  log('getgenv Scan', 'getgenv().'..i..' = '..tblformat(v))
+ end
+end
+
+local oldsetfflag = clonefunction(setfflag)
+setfflag = newcclosure(function(flag, state)
+ local upvals = oldsetfflag(flag, state)
+ log(upvals,'setfflag("'..flag..'", '..'"'..state..'")')
+ return upvals
+end)
+
+if http and http.request then
+ setreadonly(http, false)
+ http.request = nil
+ setreadonly(http, false)
+end
+local oldrequest = request
+request = newcclosure(function(data)
+ local upvals = oldrequest(data)
+ local meow = data.Body
+ if type(data.Body) == 'string' then
+  if data.Body:sub(1,1) == '{' and data.Body:sub(-1) == '}' then
+   meow = data.Body
+  else
+   meow = '"'..data.Body..'"'
+  end
+ elseif type(data.Body) == 'table' then
+  meow = 'game:GetService("HttpService"):JSONEncode('..tblformat(data.Body)..')'
+ else
+  meow = tostring(data.Body)
+ end
+ local meowmeow = '{'
+ local first = true
+ if data.Headers then
+  for i, v in pairs(data.Headers) do
+   if not first then meowmeow = meowmeow .. ', ' end
+   first = false
+   meowmeow = meowmeow .. '["'..i..'"] = "'..v..'"'
+  end
+ end
+ meowmeow = meowmeow .. '}'
+ log(upvals, 'request({\n Url = "'..data.Url..'",\n Method = "'..data.Method..'",\n Body = '..meow..',\n Headers = '..meowmeow..'\n})')
+ return upvals
+end)
+
+local oldl = clonefunction(loadstring)
+hookfunction(loadstring, function(str)
+ if true then
+  writefile(math.random(1,999)..'.txt', str)
+  warn'xd'
+ end
+ return oldl(str)
+end)
+
+local wss = game:GetService('WebSocketService')
+local oldwsscc = clonefunction(wss.CreateClient)
+hookfunction(game.WebSocketService.CreateClient, function(_, url)
+ warn('WSS')
+ if not url:lower():find'luarmor' then
+  log('idk i found luarmor use this xd', 'WebsocketService:CreateClient("WebSocketService","'..url..'")')
+ end
+ return oldwsscc(_, url)
+end)
+
+Instance = Instance or {}
+local oldinstancenew = clonefunction(Instance.new)
+setreadonly(Instance, false)
+Instance.new = newcclosure(function(name, parent)
+ if checkcaller() and not isuilib() then
+  local upvals = oldinstancenew(name, parent)
+  local a = debug.getinfo(2,'Sl')
+  if a and a.source:find('@') then
+   log(upvals, 'local a = Instance.new("'..name..'")')
+  else
+   local b = tostring(name)
+   Track[upvals] = b
+   log(upvals, 'local '..b..' = Instance.new("'..name..'")')
+  end
+  return upvals
+ end
+ return oldinstancenew(name, parent)
+end)
+
+local mt = getrawmetatable(game)
+local oldindex = clonefunction(mt.__index)
+local oldnamecall = clonefunction(mt.__namecall)
+local oldnewindex = clonefunction(mt.__newindex)
+hookmetamethod(game,'__index',newcclosure(function(self, v, ...)
+ if checkcaller() and not isuilib() then
+  local upvals = oldindex(self, v, ...)
+  local formated = tblformat(...)
+  if v == 'Character' then
+   log('LocalPlayer.Character', self:GetFullName()..'.'..v)
+   return upvals
+  end
+  if v == 'GetService' then return upvals end
+  if v == 'HttpGet' then return upvals end
+  if v == 'JSONDecode' then return upvals end
+  if v == 'CoreGui' then return upvals end
+  if v == 'JSONEncode' then return upvals end
+  if v == 'JobId' then log('game.JobId', self:GetFullName()..'.'..v) return upvals end
+  if v == 'PlaceId' then log('game.PlaceId', self:GetFullName()..'.'..v) return upvals end
+  if v == 'WaitForChild' then return upvals end
+  if v == 'FindFirstChild' then return upvals end
+  if v == 'DescendantRemoving' then return upvals end
+  if tostring(upvals):find('function:') then
+   log(upvals, self:GetFullName()..':'..v..'('..formated..')')
+   return upvals
+  end
+  log(upvals, self:GetFullName()..'.'..v)
+  return upvals
+ end
+ return oldindex(self, v, ...)
+end))
+hookmetamethod(game, '__namecall', newcclosure(function(self, ...)
+ if checkcaller() and not isuilib() and getnamecallmethod() ~= 'GetFullName' then
+  local instance = tostring(self)
+  if type(instance) == 'Instance' then
+   instance = oldnamecall(instance, 'GetFullName')
+  end
+  local upvals = oldnamecall(self, ...)
+  local args = {...}
+  local formated = tblformat(args)
+  if getnamecallmethod() == 'GetService' then
+   log(upvals, 'game:GetService("'..args[1]..'")')
+   return upvals
+  end
+  if getnamecallmethod() == 'WaitForChild' then
+   log(upvals, instance..':WaitForChild("'..args[1]..'")')
+   return upvals
+  end
+  if getnamecallmethod() == 'FindFirstChild' then
+   log(upvals, instance..':FindFirstChild("'..args[1]..'")')
+   return upvals
+  end
+  if getnamecallmethod() == 'HttpGet' then
+   log(upvals, 'game:HttpGet("'..args[1]..'", true)')
+   return upvals
+  end
+  log(upvals, instance..':'..getnamecallmethod()..'("'..formated..'")')
+  return upvals
+ end
+ return oldnamecall(self, ...)
+end))
+hookmetamethod(game, '__newindex', newcclosure(function(self, i, v)
+ if checkcaller() and not isuilib() then
+  local upvals = oldnewindex(self, i, v)
+  local a = Track[self]
+  local b = tostring(i)
+  local c = tostring(typeof(v)) or 'Unknown'
+  local d = tostring(v)
+  if a then
+   if b then
+    if c == 'Instance' then
+     log(upvals, a..'.'..b..' = '..v:GetFullName())
+    elseif c == 'number' then
+     log(upvals, a..'.'..b..' = '..d)
+    elseif c == 'string' then
+     log(upvals, a..'.'..b..' = "'..d..'"')
+    elseif c == 'boolean' then
+     log(upvals, a..'.'..b..' = '..d)
+    elseif c == 'Color3' then
+     log(upvals, a..'.'..b..' = Color3.new('..d..')')
+    elseif c == 'CFrame' then
+     log(upvals, a..'.'..b..' = CFrame.new('..d..')')
+    elseif c == 'Vector3' then
+     log(upvals, a..'.'..b..' = Vector3.new('..d..')')
+    elseif c == 'UDim2' then
+     log(upvals, a..'.'..b..' = UDim2.new('..d:gsub('{',''):gsub('}','')..')')
+    elseif c == 'Vector2' then
+     log(upvals, a..'.'..b..' = Vector2.new('..d..')')
+    elseif c == 'UDim' then
+     log(upvals, a..'.'..b..' = UDim.new('..d..')')
+    elseif c == 'EnumItem' then
+     log(upvals, a..'.'..b..' = '..d)
+    elseif c == 'ColorSequence' then
+     log(upvals, a..'.'..b..' = ColorSequence.new('..d:gsub('%s+',',')..')')
+    else
+     log(upvals, a..'.'..b..' = '..'['..c..'] '..d)
+    end
+   end
+  else
+   if b then
+    if c == 'Instance' then
+     log(upvals, 'a.'..b..' = '..v:GetFullName())
+    elseif c == 'number' then
+     log(upvals, 'a.'..b..' = '..d)
+    elseif c == 'string' then
+     log(upvals, 'a.'..b..' = "'..d..'"')
+    elseif c == 'boolean' then
+     log(upvals, 'a.'..b..' = '..d)
+    elseif c == 'Color3' then
+     log(upvals, 'a.'..b..' = Color3.new('..d..')')
+    elseif c == 'CFrame' then
+     log(upvals, 'a.'..b..' = CFrame.new('..d..')')
+    elseif c == 'Vector3' then
+     log(upvals, 'a.'..b..' = Vector3.new('..d..')')
+    elseif c == 'UDim2' then
+     log(upvals, 'a.'..b..' = UDim2.new('..d:gsub('{',''):gsub('}','')..')')
+    elseif c == 'Vector2' then
+     log(upvals, 'a.'..b..' = Vector2.new('..d..')')
+    elseif c == 'UDim' then
+     log(upvals, 'a.'..b..' = UDim.new('..d..')')
+    elseif c == 'EnumItem' then
+     log(upvals, 'a.'..b..' = '..d)
+    elseif c == 'ColorSequence' then
+     log(upvals, 'a.'..b..' = ColorSequence.new('..d:gsub('%s+',',')..')')
+    else
+     log(upvals, 'a.'..b..' = '..'['..c..'] '..d)
+    end
+   end
+  end
+  return upvals
+ end
+ return oldnewindex(self, i, v)
+end))
+
+game.DescendantRemoving:Connect(function(a)
+ Track[a] = nil
+end)
+
+local oldprint = print
+print = newcclosure(function(...)
+ if checkcaller() and not isuilib() then
+  local args = {...}
+  local formated = {}
+  for i = 1, select('#', ...) do
+   local v = args[i]
+   if type(v) == 'table' then
+    formated[i] = tblformat(v)
+   else
+    formated[i] = tostring(v)
+   end
+  end
+  local upvals = oldprint(...)
+  log(upvals, 'print("'.. table.concat(formated,'\t') ..'")')
+  return upvals
+ end
+ return oldprint(...)
+end)
+
+print("[Logger] Executing user loadstring...")
+print("[Logger] All API calls will be logged to logged.txt")
+-- Inject user code below
+PUT_THE_LOADSTRING_HERE</script>
 
     <script>
-        let currentMode = 0;
+      document.getElementById('year').textContent = new Date().getFullYear();
 
-        function switchMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === mode));
-            document.getElementById('form-single').style.display = mode === 0 ? 'block' : 'none';
-            document.getElementById('form-search').style.display = mode === 1 ? 'block' : 'none';
-        }
+      const LOGGER_TEMPLATE = document.getElementById('lua-template').textContent;
+      const PLACEHOLDER = 'PUT_THE_LOADSTRING_HERE';
 
-        function extraerLinksDelTexto(texto) {
-            const regex = /https?:\/\/[^\s<>"]+/g;
-            return texto.match(regex) || [];
-        }
+      const form = document.getElementById('form');
+      const textarea = document.getElementById('loadstring');
+      const outputSection = document.getElementById('outputSection');
+      const outputEl = document.getElementById('output');
+      const copyBtn = document.getElementById('copyBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      let currentOutput = '';
 
-        async function extraerLinks() {
-            const statusEl = document.getElementById('status');
-            const container = document.getElementById('linksContainer');
-            container.innerHTML = '';
-            
-            statusEl.innerHTML = '<span style="color:#ffff00;">[HACKING] Iniciando escaneo con TikTok-Api...</span>';
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = textarea.value.trim();
+        if (!val) return;
+        currentOutput = LOGGER_TEMPLATE.replace(PLACEHOLDER, val);
+        outputEl.textContent = currentOutput;
+        outputSection.classList.remove('hidden');
+      });
 
-            let payload = {};
+      copyBtn.addEventListener('click', async () => {
+        if (!currentOutput) return;
+        await navigator.clipboard.writeText(currentOutput);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => (copyBtn.textContent = 'Copy'), 1800);
+      });
 
-            if (currentMode === 0) {
-                const url = document.getElementById('videoUrl').value.trim();
-                if (!url.includes('tiktok.com')) {
-                    statusEl.innerHTML = '❌ ERROR: Solo links de TikTok';
-                    return;
-                }
-                payload = { mode: 'single', url: url };
-            } else {
-                const keywords = document.getElementById('keywords').value.trim();
-                const maxVideos = parseInt(document.getElementById('maxVideos').value);
-                if (!keywords) {
-                    statusEl.innerHTML = '❌ ERROR: Ingresa palabras clave';
-                    return;
-                }
-                payload = { mode: 'search', keywords: keywords, maxVideos: maxVideos };
-            }
-
-            try {
-                const response = await fetch('/extraer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) throw new Error(data.error || 'Error en el servidor');
-
-                statusEl.innerHTML = `<span style="color:var(--green);">✅ ESCANEO COMPLETO • ${data.total_links} links únicos</span>`;
-
-                if (data.links && data.links.length > 0) {
-                    let html = `<div style="margin-bottom:15px; color:#00cc33;">LINKS ENCONTRADOS (${data.links.length}):</div>`;
-                    
-                    data.links.forEach((link, i) => {
-                        html += `
-                            <div class="link-item">
-                                <span style="color:#00cc33;">${(i+1).toString().padStart(2, '0')}.</span>
-                                <a href="${link}" target="_blank" style="color:var(--green); text-decoration:none;">${link}</a>
-                            </div>`;
-                    });
-                    
-                    container.innerHTML = html;
-
-                    // ====================== SECCIÓN DE DESCARGA ======================
-                    const downloadHTML = `
-                        <div class="download-section">
-                            <button onclick="descargarArchivo(${JSON.stringify(data.links)}, 'txt')" style="padding:12px 28px; font-size:1.4rem;">
-                                💾 DESCARGAR .TXT
-                            </button>
-                            <button onclick="descargarArchivo(${JSON.stringify(data.links)}, 'csv')" style="padding:12px 28px; font-size:1.4rem;">
-                                📊 DESCARGAR .CSV (Excel)
-                            </button>
-                            <button onclick="copiarTodos('${data.links.join('\n')}')" style="padding:12px 28px; font-size:1.4rem;">
-                                📋 COPIAR TODOS
-                            </button>
-                        </div>`;
-                    
-                    container.innerHTML += downloadHTML;
-                } else {
-                    container.innerHTML = `<div class="no-links">No se encontraron enlaces https://<br>Prueba con otros keywords o vídeo.</div>`;
-                }
-
-            } catch (err) {
-                statusEl.innerHTML = `❌ ERROR: ${err.message}`;
-            }
-        }
-
-        // ====================== DESCARGA EN ARCHIVO (TXT o CSV) ======================
-        function descargarArchivo(linksArray, tipo) {
-            const fecha = new Date().toISOString().slice(0,10).replace(/-/g, '');
-            let filename = `shadow_links_${fecha}`;
-            let content = '';
-            let mime = '';
-            let ext = '';
-
-            if (tipo === 'txt') {
-                content = linksArray.join('\n');
-                mime = 'text/plain';
-                ext = '.txt';
-            } else if (tipo === 'csv') {
-                content = 'NUMERO,LINK\n' + linksArray.map((link, i) => `${i+1},"${link}"`).join('\n');
-                mime = 'text/csv';
-                ext = '.csv';
-                filename += '_excel';
-            }
-
-            const blob = new Blob([content], { type: mime });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = filename + ext;
-            a.click();
-            
-            // Mensaje hacker
-            console.log(`%c📤 Archivo ${ext.toUpperCase()} descargado: ${filename + ext}`, 'color:#00ff41; font-family:VT323');
-        }
-
-        function copiarTodos(texto) {
-            navigator.clipboard.writeText(texto).then(() => {
-                alert('✅ Todos los links copiados al portapapeles');
-            });
-        }
-
-        // Enter key
-        document.addEventListener('keypress', e => {
-            if (e.key === 'Enter') {
-                if (currentMode === 0 && document.getElementById('videoUrl') === document.activeElement) extraerLinks();
-                if (currentMode === 1 && document.getElementById('keywords') === document.activeElement) extraerLinks();
-            }
-        });
+      downloadBtn.addEventListener('click', () => {
+        if (!currentOutput) return;
+        const blob = new Blob([currentOutput], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'logger.lua';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
     </script>
-</body>
+  </body>
 </html>
